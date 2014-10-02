@@ -15,6 +15,14 @@ class Product
 		@description=description
 		@rnpa=rnpa
 	end
+
+	def toArray()
+		arr = Array.new
+		arr << @name
+		arr << @description
+		arr << @rnpa
+		return arr
+	end
 end
 
 class DroppedProduct < Product
@@ -27,6 +35,16 @@ class DroppedProduct < Product
 		@rnpa=rnpa
 		@downdate=downdate
 		@cause=cause
+	end
+
+	def toArray()
+		arr = Array.new
+		arr << @name
+		arr << @description
+		arr << @rnpa
+		arr << @downdate
+		arr << @cause
+		return arr
 	end
 end
 
@@ -144,7 +162,7 @@ class CeliarcoExtractor
 			end
 		elsif (type == TYPE_NAME_DESC_RNPA_DOWNDATE_CAUSE)
 			name = row[0].to_s.capitalize
-			desc = row[1].to_s.capitalize
+			desc = row[1].to_s.capitalize unless row[1].to_s.upcase
 			rnpa = validateRNPA(row[2].to_s)
 			downdate = row[3].to_s
 			cause = row[4].to_s.capitalize
@@ -162,7 +180,7 @@ class CeliarcoExtractor
 			#replace 3er char with '-'
 			rnpa[2] = "-"
 		elsif (rnpa.size == 8 && rnpa.match(/[0-9]{8}/))
-			left = rnpa[0..2]
+			left = rnpa[0..1]
 			right = rnpa [2..7]
 			rnpa = left + "-" + right
 		else
@@ -181,9 +199,7 @@ class CeliarcoExtractor
 		#puts array.to_s
 		CSV.open(fileName, 'w') do |csv|
 			array.each do |p|
-				line = p.name + "," + p.description + "," + p.rnpa
-				csv << line
-				csv << "\n"
+				csv << p.toArray
 			end
 		end
 	end
