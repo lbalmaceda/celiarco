@@ -67,20 +67,37 @@ class CeliarcoExtractor
     def initialize
     end
 
-    def transformPDF
+    #Shell command method. Currently working as expected
+    def transformPDFShell
+        #Get pdf size
+        reader = PDF::Reader.new(PDF_FILE)
+        lastPage = reader.page_count - 1
+        #Call shell command and hold until completes
+        `tabula -p 3-#{lastPage} #{PDF_FILE} -r -o #{CSV_FILE}`
+    end
+
+    #Gem method. Results are not the same that the shell method # UNUSED
+    def transformPDFGem
         #Get pdf size
         reader = PDF::Reader.new(PDF_FILE)
         lastPage = reader.page_count - 1
 
-        out = open(CSV_FILE, 'w')
+        out = open("output.csv", 'w')
 
-        extractor = Tabula::Extraction::ObjectExtractor.new(PDF_FILE, 3..lastPage)
+        extractor = Tabula::Extraction::ObjectExtractor.new(PDF_FILE, [3]) #3..lastPage)
         extractor.extract.each do |pdf_page|
           pdf_page.spreadsheets.each do |spreadsheet|
-            out << spreadsheet.to_csv
-            out << "\n\n"
+            row_text = Array.new
+            spreadsheet.cells.each do |cell|
+                cell.text_elements = pdf_page.get_cell_text(cell)
+                cell.options = ({:use_line_returns => false, :cell_debug => 0})
+                row_text.push(cell.text.chomp)
+            end
+            out << row_text.to_csv
+            out << "\n"
           end
         end
+        extractor.close!
         out.close
     end
 
@@ -165,7 +182,7 @@ class CeliarcoExtractor
 
     def parseProduct(row, type, array)
         if (type == TYPE_NAME_DESC_RNPA)
-            name = row[0].to_s.capitalize
+            name = row[0].to_s.split.map(&:capitalize).join(' ')
             desc = row[3].to_s #1
             desc.capitalize unless desc.upcase #1
             rnpa = validateRNPA(row[10].to_s) #2
@@ -185,13 +202,16 @@ class CeliarcoExtractor
                 end
             end
         elsif (type == TYPE_NAME_DESC_RNPA_DOWNDATE_CAUSE)
-            name = row[0].to_s.capitalize #0
+            name = row[0].to_s.split.map(&:capitalize).join(' ')
             desc = row[3].to_s #1
             desc.capitalize unless desc.upcase 
             rnpa = validateRNPA(row[6].to_s) #2
             downdate = row[9].to_s #3
             cause = row[13].to_s.capitalize #4
-            if (rnpa || rnpa.empty?)
+            if (cause.empty?)
+                cause = row[15].to_s.capitalize
+            end
+            if (rnpa)
                 if ((name.empty? || desc.empty? || rnpa.empty? || downdate.empty? || cause.empty?) && !array.empty?)
                     #Continue previous product data
                     lastProduct = array.last
@@ -259,7 +279,7 @@ end
 
 celiarco = CeliarcoExtractor.new
 p 'Empezando'
-celiarco.transformPDF
+celiarco.transformPDFShell
 celiarco.parseCSV
 p 'Finalizando'
 
