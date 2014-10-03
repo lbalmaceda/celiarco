@@ -51,8 +51,8 @@ end
 
 class CeliarcoExtractor
 
-    pdfFile = 'listado.pdf'
-    csvFile = 'resultado.csv'
+    PDF_FILE = 'listado.pdf'
+    CSV_FILE = 'listado.csv'
 
     HEADER_NEW_PRODUCTS = /(NUEVAS INCORPORACIONES)/i
     HEADER_NEW_DROPPED_PRODUCTS = /(NUEVAS BAJAS)/i
@@ -64,15 +64,17 @@ class CeliarcoExtractor
     TYPE_NAME_DESC_RNPA = 0
     TYPE_NAME_DESC_RNPA_DOWNDATE_CAUSE = 1
 
+    def initialize
+    end
 
     def transformPDF
         #Get pdf size
-        reader = PDF::Reader.new(pdfFile)
+        reader = PDF::Reader.new(PDF_FILE)
         lastPage = reader.page_count - 1
 
-        out = open(csvFile, 'w')
+        out = open(CSV_FILE, 'w')
 
-        extractor = Tabula::Extraction::ObjectExtractor.new(pdfFile, 3..lastPage)
+        extractor = Tabula::Extraction::ObjectExtractor.new(PDF_FILE, 3..lastPage)
         extractor.extract.each do |pdf_page|
           pdf_page.spreadsheets.each do |spreadsheet|
             out << spreadsheet.to_csv
@@ -85,7 +87,7 @@ class CeliarcoExtractor
     ##Remove empty cells like ("") - UNUSED
     def cleanCSV
         cleanedArray = Array.new
-        CSV.foreach(csvFile) do |row_array|
+        CSV.foreach(CSV_FILE) do |row_array|
             cleanRowArray = Array.new
             row_array.each do |cell|
                 if (!cell.empty?)
@@ -111,7 +113,7 @@ class CeliarcoExtractor
         arrayProducts = Array.new
         currentArray = nil
 
-        CSV.foreach(csvFile) do |row_array|
+        CSV.foreach(CSV_FILE) do |row_array|
             skipRow = false
             row_string = row_array.join('')
             if (row_string =~ HEADER_NEW_PRODUCTS)
