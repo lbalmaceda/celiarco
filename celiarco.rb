@@ -82,10 +82,10 @@ class CeliarcoExtractor
         out.close
     end
 
-    ##Remove empty cells like ("")
+    ##Remove empty cells like ("") - UNUSED
     def cleanCSV
         cleanedArray = Array.new
-        CSV.foreach("pruebas.csv") do |row_array|
+        CSV.foreach(csvFile) do |row_array|
             cleanRowArray = Array.new
             row_array.each do |cell|
                 if (!cell.empty?)
@@ -111,7 +111,7 @@ class CeliarcoExtractor
         arrayProducts = Array.new
         currentArray = nil
 
-        CSV.foreach("pruebas.csv") do |row_array|
+        CSV.foreach(csvFile) do |row_array|
             skipRow = false
             row_string = row_array.join('')
             if (row_string =~ HEADER_NEW_PRODUCTS)
@@ -141,18 +141,12 @@ class CeliarcoExtractor
                 skipRow = true
             end
 
-            
             if currentArray
                 if (skipRow)
                     skipRow = false
                 else
                     parseProduct(row_array, currentTableType, currentArray)
                 end
-                # if (currentTableType == TYPE_NAME_DESC_RNPA)
-                # elsif (currentTableType == TYPE_NAME_DESC_RNPA_DOWNDATE_CAUSE)
-                # end
-                # lastProduct = currentArray[currentArray.size-1]
-                # lastArray = currentArray
             end
 
           # do something with the parse result...
@@ -179,7 +173,6 @@ class CeliarcoExtractor
             if (rnpa)
                 if ((name.empty? || desc.empty? || rnpa.empty?) && !array.empty?)
                     #Continue previous product data
-                    #p ">>Continue previous product data NAME:#{name} DESC:#{desc} RNPA:#{rnpa}"
                     lastProduct = array.last
                     lastProduct.name = joinWithSpace(lastProduct.name, name) unless name.empty?
                     lastProduct.description = joinWithSpace(lastProduct.description, desc) unless desc.empty?
@@ -198,7 +191,7 @@ class CeliarcoExtractor
             cause = row[13].to_s.capitalize #4
             if (rnpa || rnpa.empty?)
                 if ((name.empty? || desc.empty? || rnpa.empty? || downdate.empty? || cause.empty?) && !array.empty?)
-                    #Continue previous product data                    puts "Continue previous product data.."
+                    #Continue previous product data
                     lastProduct = array.last
                     lastProduct.name = joinWithSpace(lastProduct.name, name) unless name.empty?
                     lastProduct.description = joinWithSpace(lastProduct.description, desc) unless desc.empty?
@@ -264,8 +257,7 @@ end
 
 celiarco = CeliarcoExtractor.new
 p 'Empezando'
-#celiarco.transformPDF
-#celiarco.cleanCSV
+celiarco.transformPDF
 celiarco.parseCSV
 p 'Finalizando'
 
