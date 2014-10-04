@@ -64,7 +64,12 @@ class CeliarcoExtractor
     TYPE_NAME_DESC_RNPA = 0
     TYPE_NAME_DESC_RNPA_DOWNDATE_CAUSE = 1
 
+    @countInvalidRNPA
+    @countMergedProducts
+
     def initialize
+        @countInvalidRNPA = 0
+        @countMergedProducts = 0
     end
 
     #Shell command method. Currently working as expected
@@ -130,44 +135,51 @@ class CeliarcoExtractor
         arrayProducts = Array.new
         currentArray = nil
 
+        isValidMerge = false
+        countHeaderRows = 0
+        
+        currentRowIndex = 0
+
         CSV.foreach(CSV_FILE) do |row_array|
-            skipRow = false
-            row_string = row_array.join('')
+            skipRow = true
+            row_string = row_array.join(' ')     #This changes the result in a small amount. wwwwwhat?
             if (row_string =~ HEADER_NEW_PRODUCTS)
                 #Reading new products
-                puts "Header NUEVOS PRODUCTOS detected"
+                #puts "Header NUEVOS PRODUCTOS detected"
                 currentTableType = TYPE_NAME_DESC_RNPA
                 currentArray = arrayNewProducts
             elsif (row_string =~ HEADER_NEW_DROPPED_PRODUCTS)
                 #Reading new dropped products
-                puts "Header NUEVAS BAJAS detected"
+                #puts "Header NUEVAS BAJAS detected"
                 currentTableType = TYPE_NAME_DESC_RNPA_DOWNDATE_CAUSE
                 currentArray = arrayNewDropped
             elsif (row_string =~ HEADER_DROPPED_PRODUCTS)
                 #Reading perma dropped products
-                puts "Header BAJAS PERMANENTES detected"
+                #puts "Header BAJAS PERMANENTES detected"
                 currentTableType = TYPE_NAME_DESC_RNPA_DOWNDATE_CAUSE
                 currentArray = arrayPermaDropped
-            elsif ((row_string =~ HEADER_RETURN) && (row_array.size >= 12)) #2
-                puts "Header PRODUCTOS detected"
+            elsif ((row_string =~ HEADER_RETURN) && (row_array.size >= 8)) #2 array size limitation, is needed?
+                #puts "Header PRODUCTOS detected"
                 currentTableType = TYPE_NAME_DESC_RNPA
                 currentArray = arrayProducts
             elsif ((row_string =~ CELL_NO_DATA) || (row_string.empty?))
                 #skip empty row
-                skipRow = true
-            elsif ((row_string =~ HEADER_PRODUCT_TABLE) && (row_array.size >= 12)) #3-5
+            elsif ((row_string =~ HEADER_PRODUCT_TABLE) && (row_array.size >= 8)) #3-5  array size limitation, is needed?
                 #skip empty row
-                skipRow = true
+            else
+                skipRow = false
             end
 
             if currentArray
                 if (skipRow)
+                    countHeaderRows += 1
                     skipRow = false
                 else
-                    parseProduct(row_array, currentTableType, currentArray)
+                    isValidMerge = parseProduct(row_array, currentTableType, currentArray, isValidMerge)
                 end
             end
 
+            currentRowIndex += 1
           # do something with the parse result...
         end
 
@@ -177,29 +189,63 @@ class CeliarcoExtractor
         csvFromArray(arrayNewProducts, "final_new_products.csv") unless arrayNewProducts.empty?
         csvFromArray(arrayProducts, "final_products.csv") unless arrayProducts.empty?
 
+        puts "============================================================"
+        puts "Filas ignoradas (Encabezados, Espacios en blanco): #{countHeaderRows}"
+        puts "Productos aptos nuevos: #{arrayNewProducts.size}"
+        puts "Productos aptos totales (anteriores + nuevos): #{arrayProducts.size}"
+        puts "Bajas nuevas: #{arrayNewDropped.size}"
+        puts "Bajas permanentes: #{arrayPermaDropped.size}"
+        puts "Productos que se unieron: #{@countMergedProducts}"
+        puts "Codigos RNPA invalidos: #{@countInvalidRNPA}"
+        puts "============================================================"
+        puts "Total de filas analizadas: #{countHeaderRows + arrayNewProducts.size + arrayProducts.size + arrayNewDropped.size + arrayPermaDropped.size + @countInvalidRNPA + @countMergedProducts}"
+        puts "============================================================"
     end
 
 
-    def parseProduct(row, type, array)
+    #Returns whether the next call to this method can be considered a merge of the product
+    def parseProduct(row, type, array, isValidMerge)
         if (type == TYPE_NAME_DESC_RNPA)
             name = row[0].to_s.split.map(&:capitalize).join(' ')
-            desc = row[3].to_s #1
+            if (name.empty?)
+                name = row[1].to_s.split.map(&:capitalize).join(' ')
+            end
+            desc = row[2].to_s #1
+            if (desc.empty?)
+                desc = row[3].to_s
+            end
+            if (desc.empty?)
+                desc = row[4].to_s
+            end
             desc.capitalize unless desc.upcase #1
-            rnpa = validateRNPA(row[10].to_s) #2
+            rnpa = validateRNPA(row[6].to_s)
             if (!rnpa || rnpa.empty?)
-                rnpa = validateRNPA(row[9].to_s)
+                rnpa = validateRNPA(row[9].to_s) #2
+            end
+            if (!rnpa || rnpa.empty?)
+                rnpa = validateRNPA(row[10].to_s)
             end
             if (rnpa)
-                if ((name.empty? || desc.empty? || rnpa.empty?) && !array.empty?)
+                #Listado.csv linea 443 > producto correcto agregado al array y puesto como "ultimo producto" 
+                #Listado.csv lineas 444-451 productos con datos faltantes. Se deberia poner un flag para no considerar
+                #a la linea 452 como la continuacion del producto 443
+                if ((name.empty? || desc.empty? || rnpa.empty?) && isValidMerge && !array.empty?)
+                    @countMergedProducts += 1
+                    #puts "Continue previous product on row #{rowIndex}"
+                    #Count+1 product merging for line counting purposes
                     #Continue previous product data
                     lastProduct = array.last
                     lastProduct.name = joinWithSpace(lastProduct.name, name) unless name.empty?
                     lastProduct.description = joinWithSpace(lastProduct.description, desc) unless desc.empty?
                     lastProduct.rnpa = joinWithSpace(lastProduct.rnpa, rnpa) unless rnpa.empty?
                     array[array.size-1] = lastProduct
+                    return false
                 elsif (!rnpa.empty?)
                     array << Product.new(name, desc, rnpa)
+                    return true
                 end
+            else
+                return false
             end
         elsif (type == TYPE_NAME_DESC_RNPA_DOWNDATE_CAUSE)
             name = row[0].to_s.split.map(&:capitalize).join(' ')
@@ -212,8 +258,11 @@ class CeliarcoExtractor
                 cause = row[15].to_s.capitalize
             end
             if (rnpa)
-                if ((name.empty? || desc.empty? || rnpa.empty? || downdate.empty? || cause.empty?) && !array.empty?)
+                if ((name.empty? || desc.empty? || rnpa.empty? || downdate.empty? || cause.empty?) && isValidMerge && !array.empty?)
+                    @countMergedProducts += 1
                     #Continue previous product data
+                    #puts "Continue previous product on row #{rowIndex}"
+                    #Count+1 product merging for line counting purposes
                     lastProduct = array.last
                     lastProduct.name = joinWithSpace(lastProduct.name, name) unless name.empty?
                     lastProduct.description = joinWithSpace(lastProduct.description, desc) unless desc.empty?
@@ -221,9 +270,13 @@ class CeliarcoExtractor
                     lastProduct.downdate = joinWithSpace(lastProduct.downdate, downdate) unless downdate.empty?
                     lastProduct.cause = joinWithSpace(lastProduct.cause, cause.downcase) unless cause.empty?
                     array[array.size-1] = lastProduct
+                    return false
                 elsif (!rnpa.empty?)
                     array << DroppedProduct.new(name, desc, rnpa, downdate, cause)
+                    return true
                 end
+            else
+                return false
             end
         end
     end
@@ -232,16 +285,27 @@ class CeliarcoExtractor
         return nil unless rnpa
         rnpa.lstrip!
         if (rnpa.size == 9 && rnpa.match(/[0-9]{2}[^0-9\\n][0-9]{6}/))
-            #replace 3er char with '-'
-            rnpa[2] = "-"
-        elsif (rnpa.size == 8 && rnpa.match(/[0-9]{8}/))
+            #Remove separator: Ex Code >> 32-238593 
             left = rnpa[0..1]
-            right = rnpa [2..7]
-            rnpa = left + "-" + right
+            right = rnpa[3..8]
+            rnpa = left + right
+        elsif (rnpa.size == 10 && rnpa.match(/[0-9]{2}[^0-9\\n][0-9]{3}[^0-9\\n][0-9]{3}/))
+            #Remove separator: Ex Code >> 32.238.593
+            left = rnpa[0..1]
+            middle = rnpa[3..5]
+            right = rnpa[7..9]
+            rnpa = left + middle + right
+        elsif (rnpa.size == 8 && rnpa.match(/[0-9]{8}/))
+            #valid!
+        elsif (rnpa.size == 7 && rnpa.match(/[0-9]{7}/))
+            #If RNPA has 7 chars, means is from other country import: Ex Code >> 0343235
+            old = rnpa[0..6]
+            rnpa = "0" + old
         elsif (rnpa.empty?)
-            # empty rnpa means product continues from the previous page
+            # empty rnpa can mean product continues from the previous page
         else
             #not valid rnpa
+            @countInvalidRNPA += 1
             out = open('invalid_rnpa.csv', 'a')
                 out << rnpa
                 out << "\n"
@@ -279,7 +343,7 @@ end
 
 celiarco = CeliarcoExtractor.new
 p 'Empezando'
-celiarco.transformPDFShell
+#celiarco.transformPDFShell
 celiarco.parseCSV
 p 'Finalizando'
 
