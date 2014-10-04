@@ -20,7 +20,6 @@ Invalid codes (Still working on how to parse them):
 * Example code: 1734/87410/2
 * Example code: 1734/8104300/1
 * Example code: 19003153-4
-* Example code: 18.006.269
 * Example code: 55-21-095359
 * Example code: 2200196913
 
