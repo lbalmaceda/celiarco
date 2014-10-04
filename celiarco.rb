@@ -226,13 +226,8 @@ class CeliarcoExtractor
                 rnpa = validateRNPA(row[10].to_s)
             end
             if (rnpa)
-                #Listado.csv linea 443 > producto correcto agregado al array y puesto como "ultimo producto" 
-                #Listado.csv lineas 444-451 productos con datos faltantes. Se deberia poner un flag para no considerar
-                #a la linea 452 como la continuacion del producto 443
                 if ((name.empty? || desc.empty? || rnpa.empty?) && isValidMerge && !array.empty?)
                     @countMergedProducts += 1
-                    #puts "Continue previous product on row #{rowIndex}"
-                    #Count+1 product merging for line counting purposes
                     #Continue previous product data
                     lastProduct = array.last
                     lastProduct.name = joinWithSpace(lastProduct.name, name) unless name.empty?
@@ -261,8 +256,6 @@ class CeliarcoExtractor
                 if ((name.empty? || desc.empty? || rnpa.empty? || downdate.empty? || cause.empty?) && isValidMerge && !array.empty?)
                     @countMergedProducts += 1
                     #Continue previous product data
-                    #puts "Continue previous product on row #{rowIndex}"
-                    #Count+1 product merging for line counting purposes
                     lastProduct = array.last
                     lastProduct.name = joinWithSpace(lastProduct.name, name) unless name.empty?
                     lastProduct.description = joinWithSpace(lastProduct.description, desc) unless desc.empty?
@@ -317,7 +310,6 @@ class CeliarcoExtractor
     end
 
     def csvFromArray(array, fileName)
-        #puts array.to_s
         CSV.open(fileName, 'w') do |csv|
             array.each do |p|
                 csv << p.toArray
@@ -343,7 +335,7 @@ end
 
 celiarco = CeliarcoExtractor.new
 p 'Empezando'
-#celiarco.transformPDFShell
+celiarco.transformPDFShell
 celiarco.parseCSV
 p 'Finalizando'
 
