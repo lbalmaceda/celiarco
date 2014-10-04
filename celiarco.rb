@@ -206,9 +206,9 @@ class CeliarcoExtractor
     #Returns whether the next call to this method can be considered a merge of the product
     def parseProduct(row, type, array, isValidMerge)
         if (type == TYPE_NAME_DESC_RNPA)
-            name = row[0].to_s.split.map(&:capitalize).join(' ')
+            name = row[0].to_s
             if (name.empty?)
-                name = row[1].to_s.split.map(&:capitalize).join(' ')
+                name = row[1].to_s
             end
             desc = row[2].to_s #1
             if (desc.empty?)
@@ -219,10 +219,10 @@ class CeliarcoExtractor
             end
             desc.capitalize unless desc.upcase #1
             rnpa = validateRNPA(row[6].to_s)
-            if (!rnpa || rnpa.empty?)
+            if (rnpa && rnpa.empty?)
                 rnpa = validateRNPA(row[9].to_s) #2
             end
-            if (!rnpa || rnpa.empty?)
+            if (rnpa && rnpa.empty?)
                 rnpa = validateRNPA(row[10].to_s)
             end
             if (rnpa)
@@ -243,7 +243,7 @@ class CeliarcoExtractor
                 return false
             end
         elsif (type == TYPE_NAME_DESC_RNPA_DOWNDATE_CAUSE)
-            name = row[0].to_s.split.map(&:capitalize).join(' ')
+            name = row[0].to_s
             desc = row[3].to_s #1
             desc.capitalize unless desc.upcase 
             rnpa = validateRNPA(row[6].to_s) #2
@@ -335,7 +335,7 @@ end
 
 celiarco = CeliarcoExtractor.new
 p 'Empezando'
-celiarco.transformPDFShell
+#celiarco.transformPDFShell
 celiarco.parseCSV
 p 'Finalizando'
 
