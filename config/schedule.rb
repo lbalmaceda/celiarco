@@ -19,6 +19,8 @@
 
 # Learn more: http://github.com/javan/whenever
 
-every :day, :at => '00:20', do
+set :output, "log/cron_log.log"
+
+every 15.minutes do
 	rake "celiarco_tasks:update_db_products"
 end
