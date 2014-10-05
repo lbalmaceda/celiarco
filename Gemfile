@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 if ENV["JRUBY"] || RUBY_PLATFORM == "java"
 	# https://devcenter.heroku.com/articles/ruby-support#ruby-versions
-	ruby '1.9.3', engine: 'jruby', engine_version: '1.7.16'
+	ruby '1.9.3', engine: 'jruby', engine_version: '1.7.15'
 else
 	ruby '1.9.3'
 end
@@ -11,13 +11,22 @@ gem 'rails', '3.2.19'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'jdbc-sqlite3'
-gem 'activerecord-jdbcsqlite3-adapter'
-
 gem 'whenever', :require => false
 gem 'pdf-reader'
 gem 'tabula-extractor', '0.7.5'
 
+
+gem 'activerecord-jdbc-adapter'
+
+group :development do
+	gem 'jdbc-sqlite3'
+	gem 'activerecord-jdbcsqlite3-adapter'
+end
+
+group :production, :test do
+	gem 'jdbc-postgres'
+	gem 'activerecord-jdbcpostgresql-adapter'
+end
 
 # Gems used only for assets and not required
 # in production environments by default.
