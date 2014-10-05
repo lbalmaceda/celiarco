@@ -1,10 +1,7 @@
 source 'https://rubygems.org'
-if ENV["JRUBY"] || RUBY_PLATFORM == "java"
-	# https://devcenter.heroku.com/articles/ruby-support#ruby-versions
-	ruby '1.9.3', engine: 'jruby', engine_version: '1.7.15'
-else
-	ruby '1.9.3'
-end
+
+ruby '1.9.3', engine: 'jruby', engine_version: '1.7.15'
+
 
 gem 'rails', '3.2.19'
 

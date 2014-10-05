@@ -34,6 +34,7 @@ module Celiarco
     # config.i18n.default_locale = :de
     config.i18n.enforce_available_locales = false
 
+    config.secret_token = "4321f059dca705305432eb5de740a1ca"
     # Configure the default encoding used in templates for Ruby 1.9.
     config.encoding = "utf-8"
 
