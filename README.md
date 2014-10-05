@@ -33,3 +33,7 @@ Means "Universal Product Code". This is the classic barcode included in the prod
 In the near future, I plan to make the Android App find products by UPC first, and if the product isn't found on the DB ask the user to enter the RNPA. If now there is a result, and the user confirm it's actually the product he is asking for, post to the server the UPC code so in the end, every product has it UPC and RNPA.
 
 
+
+#### Useful links
+* Sqlite3 and JRuby are not compatible (JRuby can't run native extensions). For this to work, we need a custom adapter.
+http://jrubyist.wordpress.com/2009/07/15/jruby-and-sqlite3-living-together/

@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  name: MyText
+  description: MyText
+  rnpa: MyString
+  barcode: MyString
+  valid: false
+  down_date: 2014-10-04
+  cause: MyText
+
+two:
+  name: MyText
+  description: MyText
+  rnpa: MyString
+  barcode: MyString
+  valid: false
+  down_date: 2014-10-04
+  cause: MyText

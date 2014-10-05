@@ -3,52 +3,6 @@ require 'tabula'        #https://github.com/tabulapdf/tabula
 require 'pdf-reader'    #https://github.com/yob/pdf-reader/
 require 'csv'
 
-
-class Product
-    attr_accessor :name
-    attr_accessor :description
-    attr_accessor :rnpa
-    attr_accessor :upc
-
-    def initialize(name, description, rnpa)
-        @name=name
-        @description=description
-        @rnpa=rnpa
-    end
-
-    def toArray()
-        arr = Array.new
-        arr << @name
-        arr << @description
-        arr << @rnpa
-        return arr
-    end
-end
-
-class DroppedProduct < Product
-    attr_accessor :downdate
-    attr_accessor :cause
-
-    def initialize(name, description, rnpa, downdate, cause)
-        @name=name
-        @description=description
-        @rnpa=rnpa
-        @downdate=downdate
-        @cause=cause
-    end
-
-    def toArray()
-        arr = Array.new
-        arr << @name
-        arr << @description
-        arr << @rnpa
-        arr << @downdate
-        arr << @cause
-        return arr
-    end
-end
-
-
 class CeliarcoExtractor
 
     PDF_FILE = 'listado.pdf'

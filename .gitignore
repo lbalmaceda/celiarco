@@ -1,6 +1,8 @@
 ### Celiarco specific files ###
 *.pdf
 *.csv
+/data/*.pdf
+/data/*.csv
 
 ### Rails ###
 *.rbc
