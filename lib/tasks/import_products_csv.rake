@@ -2,21 +2,24 @@ require 'tabula'        #https://github.com/tabulapdf/tabula
                         #https://github.com/tabulapdf/tabula-extractor
 require 'pdf-reader'    #https://github.com/yob/pdf-reader/
 require 'csv'
+require 'open-uri'
 
-namespace :celiarco_tasks do
+namespace :celiarco do
 	task :update_db_products => :environment do
     	parseCSV
  	end
 	task :pdf_to_csv => :environment do
-    
+        transformPDFShell
 	end
 	task :download_pdf => :environment do
-    
+        downloadPDF
 	end
 end 
 
 PDF_FILE = 'data/listado.pdf'
 CSV_FILE = 'data/listado.csv'
+
+INVALID_RNPA_FILE = "data/invalid_rnpa.csv"
 
 HEADER_NEW_PRODUCTS = /(NUEVAS INCORPORACIONES)/i
 HEADER_NEW_DROPPED_PRODUCTS = /(NUEVAS BAJAS)/i
@@ -64,6 +67,23 @@ class TemporaryProduct
     	end
 	end
 
+end
+
+
+def downloadPDF
+    url = "http://www.anmat.gov.ar/listados/Listado_de_Alimentos_Libres_de_Gluten_26_09_2014.pdf"
+    File.open(PDF_FILE, "wb") do |file|
+        file.write open(url).read
+    end
+end
+
+#Shell command method. Currently working as expected
+def transformPDFShell
+    #Get pdf size
+    reader = PDF::Reader.new(PDF_FILE)
+    lastPage = reader.page_count - 1
+    #Call shell command and hold until completes
+    `tabula -p 3-#{lastPage} #{PDF_FILE} -r -o #{CSV_FILE}`
 end
 
 def parseCSV
@@ -244,7 +264,7 @@ def validateRNPA(rnpa)
     else
         #not valid rnpa
         @countInvalidRNPA += 1
-        out = open('data/invalid_rnpa.csv', 'a')
+        out = open(INVALID_RNPA_FILE, 'a')
             out << rnpa
             out << "\n"
         out.close

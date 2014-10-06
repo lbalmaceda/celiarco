@@ -21,6 +21,8 @@
 
 set :output, "log/cron_log.log"
 
-every 15.minutes do
-	rake "celiarco_tasks:update_db_products"
+every 1.week do
+	rake "celiarco:download_pdf"
+	rake "celiarco:pdf_to_csv"
+	rake "celiarco:update_db_products"
 end
