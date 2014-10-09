@@ -1,5 +1,9 @@
 class ProductsController < ApplicationController
 
+  def to_param
+    rnpa
+  end
+
   # GET /products
   # GET /products.json
   def index
@@ -10,7 +14,7 @@ class ProductsController < ApplicationController
       format.json { render json: @products }
     end
   end
-
+  
   # GET /products/1
   # GET /products/1.json
   def show

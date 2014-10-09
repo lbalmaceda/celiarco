@@ -1,6 +1,7 @@
 Celiarco::Application.routes.draw do
-  match 'products/:rnpa' => 'products#show'
-  resources :products
+
+  get 'products' => 'products#index'
+  get 'products/:rnpa' => 'products#show', :as => 'rnpa_product'
 
   root :to => 'products#index'
 
