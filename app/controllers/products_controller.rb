@@ -1,13 +1,10 @@
 class ProductsController < ApplicationController
 
-  def to_param
-    rnpa
-  end
-
   # GET /products
   # GET /products.json
   def index
-    @products = Product.all
+    @products = Product.paginate(:page => params[:page], :per_page => 25)
+    #@products = Product.all
 
     respond_to do |format|
       format.html # index.html.erb
@@ -19,6 +16,7 @@ class ProductsController < ApplicationController
   # GET /products/1.json
   def show
     @product = Product.find_by_rnpa(params[:rnpa])
+    raise ActiveRecord::RecordNotFound if not @product
 
     respond_to do |format|
       format.html # show.html.erb

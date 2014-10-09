@@ -14,6 +14,11 @@ namespace :celiarco do
 	task :download_pdf => :environment do
         downloadPDF
 	end
+    task :all => environment do
+        downloadPDF
+        transformPDFShell
+        parseCSV
+    end
 end 
 
 PDF_FILE = 'data/listado.pdf'

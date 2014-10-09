@@ -1,6 +1,6 @@
 <h1>Listing products</h1>
 
-<table>
+<table border="1">
   <tr>
     <th>Name</th>
     <th>Description</th>
@@ -9,9 +9,7 @@
     <th>Gluten free</th>
     <th>Down date</th>
     <th>Cause</th>
-    <th></th>
-    <th></th>
-    <th></th>
+    <th>Action</th>
   </tr>
 
 <% @products.each do |product| %>
@@ -27,5 +25,8 @@
     </tr>
 <% end %>
 </table>
+
+
+<%= will_paginate @products %>
 
 <br />
