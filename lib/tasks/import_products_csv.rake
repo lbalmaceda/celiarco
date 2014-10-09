@@ -14,7 +14,7 @@ namespace :celiarco do
 	task :download_pdf => :environment do
         downloadPDF
 	end
-    task :all => environment do
+    task :all => :environment do
         downloadPDF
         transformPDFShell
         parseCSV
