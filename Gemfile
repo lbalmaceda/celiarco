@@ -12,7 +12,6 @@ gem 'whenever', :require => false
 gem 'pdf-reader'
 gem 'tabula-extractor', '0.7.5'
 gem 'will_paginate', '~> 3.0'
-gem 'rack-ssl-enforcer'
 
 gem 'activerecord-jdbc-adapter'
 
