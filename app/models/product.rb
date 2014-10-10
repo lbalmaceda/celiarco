@@ -25,12 +25,7 @@ class Product < ActiveRecord::Base
 
         if (Product.exists?(:rnpa => args[:rnpa]))
             p = Product.find_by_rnpa(args[:rnpa])
-            p.update_attribute(:name, args[:name]) if args[:name] 
-            p.update_attribute(:description, args[:description]) if args[:description] 
-            p.update_attribute(:barcode, args[:barcode]) if args[:barcode] 
-            p.update_attribute(:cause, args[:cause]) if args[:cause] 
-            p.update_attribute(:down_date, args[:down_date]) if args[:down_date] 
-            p.update_attribute(:gluten_free, args[:gluten_free])
+            p.update_attributes(args)
             print "."
             return true;
         else

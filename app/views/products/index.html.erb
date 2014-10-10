@@ -1,4 +1,4 @@
-<h1>Listing products</h1>
+<h1>Listing <%=@products_valid_count%> valid and <%=@products_dropped_count%> dropped products (Total: <%=@products_dropped_count + @products_valid_count%>)</h1>
 
 <table border="1">
   <tr>
@@ -26,7 +26,10 @@
 <% end %>
 </table>
 
-
+<br />
 <%= will_paginate @products %>
 
 <br />
+
+<h3 > Last updated at <%=@products_last_update%> </h3>
+<br/>

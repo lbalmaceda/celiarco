@@ -4,7 +4,9 @@ class ProductsController < ApplicationController
   # GET /products.json
   def index
     @products = Product.paginate(:page => params[:page], :per_page => 25)
-    #@products = Product.all
+    @products_valid_count = Product.where(:gluten_free => true).count
+    @products_dropped_count = Product.where(:gluten_free => false).count
+    @products_last_update = Product.order("created_at").last.created_at
 
     respond_to do |format|
       format.html # index.html.erb

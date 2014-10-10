@@ -3,10 +3,9 @@ require 'tabula'        #https://github.com/tabulapdf/tabula
 require 'pdf-reader'    #https://github.com/yob/pdf-reader/
 require 'csv'
 require 'open-uri'
-require 'rest_client'
 
 namespace :celiarco do
-	task :update_db_products => :environment do
+	task :csv_into_db => :environment do
     	parseCSV
  	end
 	task :pdf_to_csv => :environment do
@@ -157,11 +156,8 @@ def parseCSV
     csvFromArray(arrayNewProducts, "data/final_new_products.csv") unless arrayNewProducts.empty?
     csvFromArray(arrayProducts, "data/final_products.csv") unless arrayProducts.empty?
 
-    #dbFromArray(arrayProducts)
-    #dbFromArray(arrayPermaDropped)
-
-    postFromArray(arrayProducts)
-    postFromArray(arrayPermaDropped)
+    dbFromArray(arrayProducts)
+    dbFromArray(arrayPermaDropped)
 
     puts "============================================================"
     puts "Filas ignoradas (Encabezados, Espacios en blanco): #{countHeaderRows}"
@@ -299,19 +295,6 @@ def dbFromArray(array)
 		Product.create_or_update(temp.attributes)
 	end
 end
-
-def postFromArray(array)
-    url = 'http://celiarco.herokuapp.com/products?token=tokenloco'
-    array.each do |temp|
-        response = RestClient.post url, :product => temp.attributes
-        if (response.code != 200)
-            print "fail."
-        elsif
-            sleep 2
-        end
-    end
-end
-
 
 def joinWithSpace(left, right)
     right[0] = right[0].downcase

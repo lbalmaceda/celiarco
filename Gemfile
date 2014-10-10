@@ -12,7 +12,7 @@ gem 'whenever', :require => false
 gem 'pdf-reader'
 gem 'tabula-extractor', '0.7.5'
 gem 'will_paginate', '~> 3.0'
-gem 'rest-client'
+#gem 'rest-client'
 
 gem 'activerecord-jdbc-adapter'
 
