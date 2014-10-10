@@ -33,4 +33,14 @@ class Product < ActiveRecord::Base
         end
     end
 
+    def self.search_by_rnpa(search)
+        if search
+          if Rails.env == 'production'
+            where('rnpa ILIKE ?', "%#{search}").order('created_at ASC')
+          else
+            where('rnpa LIKE ?', "%#{search}").order('created_at ASC')
+          end
+        end
+    end
+
 end

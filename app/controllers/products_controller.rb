@@ -3,17 +3,43 @@ class ProductsController < ApplicationController
   # GET /products
   # GET /products.json
   def index
-    @products = Product.paginate(:page => params[:page], :per_page => 25)
     @products_valid_count = Product.where(:gluten_free => true).count
     @products_dropped_count = Product.where(:gluten_free => false).count
-    @products_last_update = Product.order("created_at").last.created_at
+    last_product = Product.order("created_at").last;
+    @products_last_update = last_product.created_at if last_product
 
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render json: @products }
+    if (params[:search])
+      result = Product.search_by_rnpa(params[:search])
+      if result.count == 0
+        @products = Product.paginate(:page => params[:page], :per_page => 25)
+        flash.now[:error] = 'No products found with that RNPA'
+        respond_to do |format|
+          format.html # index.html.erb
+          format.json { render json: @products }
+        end
+      elsif result.count == 1
+        @product = result.first
+        respond_to do |format|
+          format.html { redirect_to action: 'show', :token => params[:token], :rnpa => @product.rnpa } # show.html.erb
+          format.json { render json: @product }
+        end
+      else
+        @products = result.paginate(:page => params[:page], :per_page => 25)
+        respond_to do |format|
+          format.html # index.html.erb
+          format.json { render json: @products }
+        end
+      end
+    else
+      @products = Product.paginate(:page => params[:page], :per_page => 25)
+
+      respond_to do |format|
+        format.html # index.html.erb
+        format.json { render json: @products }
+      end
     end
   end
-  
+
   # GET /products/1
   # GET /products/1.json
   def show
