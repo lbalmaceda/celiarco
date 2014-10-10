@@ -2,7 +2,8 @@ Celiarco::Application.routes.draw do
 
   get 'products' => 'products#index'
   post 'products' => 'products#create_or_update'
-  get 'products/:rnpa' => 'products#show', :as => 'rnpa_product'
+  get 'products/show' => 'products#show', :as => 'search_product'
+  put 'products' => 'products#update_barcode'
 
   root :to => 'products#index'
 

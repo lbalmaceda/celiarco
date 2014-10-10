@@ -33,7 +33,7 @@
     <td><%= product.gluten_free %></td>
     <td><%= product.down_date %></td>
     <td><%= product.cause %></td>
-    <td><%= link_to 'Show', rnpa_product_path(product.rnpa, :token => params[:token]) %></td>
+    <td><%= link_to 'Show', search_product_path({:rnpa => product.rnpa, :token => params[:token]}) %></td>
     </tr>
 <% end %>
 </table>

@@ -43,7 +43,11 @@ class ProductsController < ApplicationController
   # GET /products/1
   # GET /products/1.json
   def show
-    @product = Product.find_by_rnpa(params[:rnpa])
+    if (params[:rnpa])
+      @product = Product.find_by_rnpa(params[:rnpa])
+    elsif (params[:barcode])
+      @product = Product.find_by_barcode(params[:barcode])
+    end
     raise ActiveRecord::RecordNotFound if not @product
 
     respond_to do |format|
@@ -64,6 +68,25 @@ class ProductsController < ApplicationController
     end
   end
 
+
+  # PUT /products/1
+  # PUT /products/1.json
+  def update_barcode
+    @product = Product.find_by_rnpa(params[:rnpa])
+    invalid_barcode = Product.find_by_barcode(params[:barcode])
+
+    respond_to do |format|
+      if !invalid_barcode && @product.update_attribute(:barcode, params[:barcode])
+        flash.now[:notice] = 'Product was successfully updated.'
+        format.html { render action: "show" }
+        format.json { head :no_content }
+      else
+        format.html { render action: "show" }
+        format.json { render json: @product.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
   # POST /products
   # POST /products.json
   def create
@@ -80,20 +103,6 @@ class ProductsController < ApplicationController
     end
   end
 
-  # PUT /products/1
-  # PUT /products/1.json
-  def update
-    @product = Product.find(params[:id])
-
-    respond_to do |format|
-      if @product.update_attributes(params[:product])
-        format.html { redirect_to @product, notice: 'Product was successfully updated.' }
-        format.json { head :no_content }
-      else
-        format.html { render action: "edit" }
-        format.json { render json: @product.errors, status: :unprocessable_entity }
-      end
-    end
-  end
+  
 
 end
