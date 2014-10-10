@@ -24,20 +24,16 @@ class ProductsController < ApplicationController
     end
   end
 
-  # GET /products/new
-  # GET /products/new.json
-  def new
-    @product = Product.new
+  def create_or_update
+    success = Product.create_or_update(params[:product])
 
     respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: @product }
+      if success
+        format.json { render :nothing => true, status: :created}
+      else
+        format.json { render :nothing => true, status: :unprocessable_entity }
+      end
     end
-  end
-
-  # GET /products/1/edit
-  def edit
-    @product = Product.find(params[:id])
   end
 
   # POST /products
@@ -72,15 +68,4 @@ class ProductsController < ApplicationController
     end
   end
 
-  # DELETE /products/1
-  # DELETE /products/1.json
-  def destroy
-    @product = Product.find(params[:id])
-    @product.destroy
-
-    respond_to do |format|
-      format.html { redirect_to products_url }
-      format.json { head :no_content }
-    end
-  end
 end

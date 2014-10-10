@@ -32,8 +32,9 @@ class Product < ActiveRecord::Base
             p.update_attribute(:down_date, args[:down_date]) if args[:down_date] 
             p.update_attribute(:gluten_free, args[:gluten_free])
             print "."
+            return true;
         else
-            Product.create(args)
+            return Product.create(args)
         end
     end
 

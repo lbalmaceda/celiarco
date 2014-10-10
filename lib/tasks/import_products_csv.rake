@@ -3,6 +3,7 @@ require 'tabula'        #https://github.com/tabulapdf/tabula
 require 'pdf-reader'    #https://github.com/yob/pdf-reader/
 require 'csv'
 require 'open-uri'
+require 'rest_client'
 
 namespace :celiarco do
 	task :update_db_products => :environment do
@@ -76,6 +77,7 @@ end
 
 
 def downloadPDF
+    puts "Downloading the PDF"
     url = "http://www.anmat.gov.ar/listados/Listado_de_Alimentos_Libres_de_Gluten_26_09_2014.pdf"
     File.open(PDF_FILE, "wb") do |file|
         file.write open(url).read
@@ -85,6 +87,7 @@ end
 #Shell command method. Currently working as expected
 def transformPDFShell
     #Get pdf size
+    puts "Tabula is transforming PDF into CSVs files"
     reader = PDF::Reader.new(PDF_FILE)
     lastPage = reader.page_count - 1
     #Call shell command and hold until completes
@@ -92,6 +95,7 @@ def transformPDFShell
 end
 
 def parseCSV
+    puts "Parsing the CSV lines into the DB."
     currentTableType = 0
     arrayNewDropped = Array.new
     arrayPermaDropped = Array.new
@@ -153,8 +157,11 @@ def parseCSV
     csvFromArray(arrayNewProducts, "data/final_new_products.csv") unless arrayNewProducts.empty?
     csvFromArray(arrayProducts, "data/final_products.csv") unless arrayProducts.empty?
 
-    dbFromArray(arrayProducts)
-    dbFromArray(arrayPermaDropped)
+    #dbFromArray(arrayProducts)
+    #dbFromArray(arrayPermaDropped)
+
+    postFromArray(arrayProducts)
+    postFromArray(arrayPermaDropped)
 
     puts "============================================================"
     puts "Filas ignoradas (Encabezados, Espacios en blanco): #{countHeaderRows}"
@@ -292,6 +299,19 @@ def dbFromArray(array)
 		Product.create_or_update(temp.attributes)
 	end
 end
+
+def postFromArray(array)
+    url = 'http://celiarco.herokuapp.com/products?token=tokenloco'
+    array.each do |temp|
+        response = RestClient.post url, :product => temp.attributes
+        if (response.code != 200)
+            print "fail."
+        elsif
+            sleep 2
+        end
+    end
+end
+
 
 def joinWithSpace(left, right)
     right[0] = right[0].downcase
