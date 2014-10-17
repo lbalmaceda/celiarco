@@ -1,7 +1,8 @@
 class Product < ActiveRecord::Base
     validates :name, :description, :rnpa, presence: true
     validates :rnpa, uniqueness: true
-    attr_accessible :barcode, :cause, :description, :down_date, :name, :rnpa, :gluten_free
+    attr_accessible :cause, :description, :down_date, :name, :rnpa, :gluten_free
+    has_many :barcodes, :dependent => :destroy
 
     def toArray()
     	arr = Array.new

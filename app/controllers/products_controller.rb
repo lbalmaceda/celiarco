@@ -8,20 +8,20 @@ class ProductsController < ApplicationController
     last_product = Product.order("created_at").last;
     @products_last_update = last_product.created_at if last_product
 
-    if (params[:search])
-      result = Product.search_by_rnpa(params[:search])
+    if (params[:search_rnpa])
+      result = Product.search_by_rnpa(params[:search_rnpa])
       if result.count == 0
         @products = Product.paginate(:page => params[:page], :per_page => 25)
         flash.now[:error] = 'No products found with that RNPA'
         respond_to do |format|
           format.html # index.html.erb
-          format.json { render json: @products }
+          format.json { render json: Array.new }
         end
       elsif result.count == 1
         @product = result.first
         respond_to do |format|
           format.html { redirect_to action: 'show', :token => params[:token], :rnpa => @product.rnpa } # show.html.erb
-          format.json { render json: @product }
+          format.json { render json:  Array.new.push(@product) }
         end
       else
         @products = result.paginate(:page => params[:page], :per_page => 25)
