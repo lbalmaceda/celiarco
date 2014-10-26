@@ -16,8 +16,12 @@
 </p>
 
 <p>
-  <b>Barcode:</b>
-  <%= @product.barcode %>
+  <b>Barcodes:</b>
+  <td>
+      <% @product.barcodes.each do |barcode| %>
+        <%= barcode.barcode %> => <%= barcode.times %>,
+      <% end %>
+    </td>
 </p>
 
 <p>
