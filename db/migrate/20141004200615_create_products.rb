@@ -4,7 +4,6 @@ class CreateProducts < ActiveRecord::Migration
       t.text :name
       t.text :description
       t.string :rnpa
-      t.string :barcode
       t.boolean :gluten_free
       t.date :down_date
       t.text :cause

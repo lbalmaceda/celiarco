@@ -46,13 +46,15 @@ class ProductsController < ApplicationController
     if (params[:rnpa])
       @product = Product.find_by_rnpa(params[:rnpa])
     elsif (params[:barcode])
-      @product = Product.find_by_barcode(params[:barcode])
+      @products = Product.search_by_barcode(params[:barcode])
     end
 
     respond_to do |format|
       if @product
         format.html # show.html.erb
         format.json { render json: @product }
+      elsif @products
+        format.json { render json: @products }
       else
         format.json { render json: "Not found!", status: :ok }
       end

@@ -44,6 +44,12 @@ class Product < ActiveRecord::Base
         end
     end
 
+    def self.search_by_barcode(search)
+        if search
+            joins(:barcodes).where('barcodes.barcode == ?', search).order('barcodes.times DESC').first(10)
+        end
+    end
+
     def add_barcode(barcode)
         code = barcodes.where(:barcode => barcode).first
         if (code)

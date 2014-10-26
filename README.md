@@ -37,3 +37,59 @@ In the near future, I plan to make the Android App find products by UPC first, a
 #### Useful links
 * Sqlite3 and JRuby are not compatible (JRuby can't run native extensions). For this to work, we need a custom adapter.
 http://jrubyist.wordpress.com/2009/07/15/jruby-and-sqlite3-living-together/
+
+
+
+Rest API
+-----------------------------------------
+### Search Products by RNPA
+* Request => GET '/products.json'
+```javascript
+params: { search_rnpa="123456789", token="validtoken"} 
+```
+* Response => 200
+```javascript
+[{name="Product", description="About me", rnpa="123456789", gluten_free=false, down_date="2014-10-10T15:20:27Z", cause="Removed from the list"}, ...]
+```
+
+### Show Product with RNPA
+* Request => GET '/products/:rnpa.json'
+```javascript
+params: {rnpa="123456789", token="validtoken"} 
+```
+
+* Response => 200
+```javascript
+{name="Product", description="About me", rnpa="123456789", gluten_free=false, down_date="2014-10-10T15:20:27Z", cause="Removed from the list"}
+```
+
+t.text     "name"
+    t.text     "description"
+    t.string   "rnpa"
+    t.boolean  "gluten_free"
+    t.date     "down_date"
+    t.text     "cause"
+
+
+### Show Products with Barcode
+* Request => GET '/barcodes/:barcode.json'
+```javascript
+params: {barcode="01010101", token="validtoken"} 
+```
+
+* Response => 200
+```javascript
+[{name="Product", description="About me", rnpa="123456789", gluten_free=false, down_date="2014-10-10T15:20:27Z", cause="Removed from the list"}, ...]
+```
+
+### Add Barcode to an existing Product
+* Request => POST '/products/:rnpa/:barcode.json'
+```javascript
+params: {rnpa="123456789", barcode="01010101", token="validtoken"} 
+```
+
+* Response => 200
+```javascript
+{name="Product", description="About me", rnpa="123456789", gluten_free=false, down_date="2014-10-10T15:20:27Z", cause="Removed from the list"}
+```
+

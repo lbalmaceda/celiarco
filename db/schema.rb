@@ -25,7 +25,6 @@ ActiveRecord::Schema.define(:version => 20141014140300) do
     t.text     "name"
     t.text     "description"
     t.string   "rnpa"
-    t.string   "barcode"
     t.boolean  "gluten_free"
     t.date     "down_date"
     t.text     "cause"
