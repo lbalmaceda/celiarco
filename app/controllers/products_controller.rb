@@ -40,19 +40,22 @@ class ProductsController < ApplicationController
     end
   end
 
-  # GET /products/1
-  # GET /products/1.json
+  # GET /products/:rnpa
+  # GET /products/:rnpa.json
   def show
     if (params[:rnpa])
       @product = Product.find_by_rnpa(params[:rnpa])
     elsif (params[:barcode])
       @product = Product.find_by_barcode(params[:barcode])
     end
-    raise ActiveRecord::RecordNotFound if not @product
 
     respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @product }
+      if @product
+        format.html # show.html.erb
+        format.json { render json: @product }
+      else
+        format.json { render json: "Not found!", status: :ok }
+      end
     end
   end
 
@@ -63,26 +66,7 @@ class ProductsController < ApplicationController
       if success
         format.json { render :nothing => true, status: :created}
       else
-        format.json { render :nothing => true, status: :unprocessable_entity }
-      end
-    end
-  end
-
-
-  # PUT /products/1
-  # PUT /products/1.json
-  def update_barcode
-    @product = Product.find_by_rnpa(params[:rnpa])
-    invalid_barcode = Product.find_by_barcode(params[:barcode])
-
-    respond_to do |format|
-      if !invalid_barcode && @product.update_attribute(:barcode, params[:barcode])
-        flash.now[:notice] = 'Product was successfully updated.'
-        format.html { render action: "show" }
-        format.json { head :no_content }
-      else
-        format.html { render action: "show" }
-        format.json { render json: @product.errors, status: :unprocessable_entity }
+        format.json { render @product.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -103,6 +87,23 @@ class ProductsController < ApplicationController
     end
   end
 
+
+  # POST /products/:rnpa/:barcode.json
+  # POST /products/:rnpa/:barcode.json
+  def add_barcode
+        if (params[:rnpa] && params[:barcode])
+          @product = Product.find_by_rnpa(params[:rnpa])
+          @product.add_barcode(params[:barcode]) if @product
+        end
+
+        respond_to do |format|
+          if @product
+            format.json { render json: @product, status: :created }
+          else
+            format.json { render @product.errors, status: :unprocessable_entity }
+          end
+        end
+    end
   
 
 end

@@ -44,4 +44,16 @@ class Product < ActiveRecord::Base
         end
     end
 
+    def add_barcode(barcode)
+        code = barcodes.where(:barcode => barcode).first
+        if (code)
+            code.times = code.times + 1
+            code.save
+            p 'barcode exists! add 1 time'
+        else
+            barcodes.create!(:barcode => barcode, :times => 1)
+            p 'new barcode added!'
+        end
+    end
+
 end

@@ -1,9 +1,13 @@
 Celiarco::Application.routes.draw do
 
+  #Web
   get 'products' => 'products#index'
-  post 'products' => 'products#create_or_update'
   get 'products/show' => 'products#show', :as => 'search_product'
-  put 'products' => 'products#update_barcode'
+
+  #Android/JSON
+  get 'products/:rnpa' => 'products#show'
+  get 'barcodes/:barcode' => 'products#show'
+  post 'products/:rnpa/:barcode' => 'products#add_barcode'
 
   root :to => 'products#index'
 
